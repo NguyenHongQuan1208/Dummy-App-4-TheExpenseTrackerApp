@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constant/styles";
+import Button from "../components/UI/Button";
 function ManageExpense({ route, navigation }) {
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
@@ -12,9 +13,28 @@ function ManageExpense({ route, navigation }) {
     });
   }, [navigation, isEditing]);
 
-  function deleteExpenseHandler() {}
+  function deleteExpenseHandler() {
+    navigation.goBack();
+  }
+
+  function cancelHandler() {
+    navigation.goBack();
+  }
+
+  function confirmHandler() {
+    navigation.goBack();
+  }
   return (
     <View style={styles.container}>
+      <View style={styles.buttons}>
+        <Button mode="flat" onPress={cancelHandler} style={styles.button}>
+          Cancel
+        </Button>
+        <Button style={styles.button} onPress={confirmHandler}>
+          {isEditing ? "Update" : "Add"}
+        </Button>
+      </View>
+
       {isEditing && (
         <View style={styles.deleteContainer}>
           <IconButton
@@ -36,7 +56,15 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: GlobalStyles.colors.primary800,
   },
-
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button: {
+    minWidth: 120,
+    marginHorizontal: 8,
+  },
   deleteContainer: {
     marginTop: 16,
     paddingTop: 8,
