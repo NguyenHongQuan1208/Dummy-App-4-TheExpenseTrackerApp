@@ -1,14 +1,17 @@
 import { useContext, useLayoutEffect } from "react";
-import { Text, View, StyleSheet, TextInput } from "react-native";
+import { StyleSheet, View } from "react-native";
+
+import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constant/styles";
-import Button from "../components/UI/Button";
 import { ExpensesContext } from "../store/expense-context";
-import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { storeExpense } from "../util/http";
+
 function ManageExpense({ route, navigation }) {
+  const expensesCtx = useContext(ExpensesContext);
+
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
-  const expensesCtx = useContext(ExpensesContext);
 
   const selectedExpense = expensesCtx.expenses.find(
     (expense) => expense.id === editedExpenseId
@@ -29,23 +32,24 @@ function ManageExpense({ route, navigation }) {
     navigation.goBack();
   }
 
-  function confirmHandler(expenseData) {
+  async function confirmHandler(expenseData) {
     if (isEditing) {
       expensesCtx.updateExpense(editedExpenseId, expenseData);
     } else {
-      expensesCtx.addExpense(expenseData);
+      const id = await storeExpense(expenseData);
+      expensesCtx.addExpense({ ...expenseData, id: id });
     }
     navigation.goBack();
   }
+
   return (
     <View style={styles.container}>
       <ExpenseForm
-        onCancel={cancelHandler}
         submitButtonLabel={isEditing ? "Update" : "Add"}
         onSubmit={confirmHandler}
+        onCancel={cancelHandler}
         defaultValues={selectedExpense}
       />
-
       {isEditing && (
         <View style={styles.deleteContainer}>
           <IconButton
@@ -59,6 +63,7 @@ function ManageExpense({ route, navigation }) {
     </View>
   );
 }
+
 export default ManageExpense;
 
 const styles = StyleSheet.create({
@@ -67,7 +72,6 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: GlobalStyles.colors.primary800,
   },
-
   deleteContainer: {
     marginTop: 16,
     paddingTop: 8,
